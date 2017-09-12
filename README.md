@@ -5,3 +5,4 @@ kevin was here
 This line was created locally
  
 from Rstudio
+Stage, commit, pull, and push your change
