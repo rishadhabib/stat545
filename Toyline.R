@@ -1,3 +1,10 @@
+---
+  title: "stat545"
+author: Rishad Habib
+date: September 12, 2017
+output: github_document
+---
+  
 a <- 2
 b <- -3
 sig_sq <- 0.5
