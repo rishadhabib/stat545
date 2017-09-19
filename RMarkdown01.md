@@ -1,6 +1,23 @@
 # RMarkdown01
 
-## use markdown files for Github
+- use markdown files for Github
+- ctrl + alt + i to insert a code chunk
+- put a comma after r to set how the run will load
+
+
+
+```r
+x <- rnorm(500)
+y <- rnorm(500) 
+
+plot (x, y)
+```
+
+![](RMarkdown01_files/figure-html/unnamed-chunk-1-1.png)<!-- -->
+
+
+
+
 
 
 

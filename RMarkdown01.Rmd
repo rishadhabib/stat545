@@ -1,11 +1,28 @@
 ---
 title: "RMarkdown01"
-output: 
-  html_document: 
+output:
+  pdf_document: default
+  html_document:
     keep_md: yes
 ---
 
-## use markdown files for Github
+- use markdown files for Github
+- ctrl + alt + i to insert a code chunk
+- put a comma after r to set how the run will load
+
+
+```{r, fig.height=5, fig.width = 4}
+x <- rnorm(500)
+y <- rnorm(500) 
+
+plot (x, y)
+```
+
+```{r}
+
+```
+
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -31,3 +48,80 @@ plot(pressure)
 #plot run
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+#cm005
+
+```{r}
+library(gapminder)
+library (tidyverse)
+```
+
+```{r}
+##How many variables (columns) are in the iris dataset, and what are their names?
+str(iris)
+```
+
+```{r}
+#How many rows are in the data set?
+nrow(iris)
+
+```
+
+```{r}
+#What are the smallest values of each numeric variable?
+summary(iris)
+```
+
+```{r}
+#Extract the Petal.Width column to get a vector of observations (we’ll see vectors in more detail in a later class), and
+petalwidth <- iris$Petal.Width
+#Make a histogram
+hist(petalwidth)
+#Make a table of frequencies
+table(iris$Petal.Width, iris$Species)
+```
+
+#2.2. dplyr fundamentals
+
+```{r}
+filter(gapminder, country=="Canada" & year >1970) #use the filter to choose your data
+```
+
+
+```{r}
+#Find all entries of Canada and Algeria.
+filter(gapminder, country %in% c("Canada", "Algeria"))
+
+#Find all entries of Canada and Algeria, occuring in the ’60s.
+filter(gapminder, country %in% c("Canada", "Algeria"), year >=1960 & year < 1970)
+
+#Find all entries of Canada, and entries of Algeria occuring in the ’60s.
+filter(gapminder, (country =="Canada")| (country == "Algeria"& year >=1960 & year < 1970))
+
+#Find all entries not including European countries.
+filter(gapminder, continent != "Europe")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
