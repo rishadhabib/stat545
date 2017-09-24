@@ -43,7 +43,7 @@ You can also embed plots, for example:
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
 
 cm005
-=====
+-----
 
 ``` r
 library(gapminder)
@@ -361,3 +361,229 @@ gapminder %>%
     ##  9  1952   69.12      Australia   Oceania  8691212 10039.596
     ## 10  1952   68.75         Canada  Americas 14785584 11367.161
     ## # ... with 1,694 more rows
+
+Date: 21st September 2017
+-------------------------
+
+mutate creates a new variable by calculating from other variables. - transmute works the same way, but drops all other variables.
+
+``` r
+mutate(gapminder, 
+       gdp = gdpPercap * pop,
+       gdpBill = round(gdp/10000000, 1))
+```
+
+    ## # A tibble: 1,704 x 8
+    ##        country continent  year lifeExp      pop gdpPercap         gdp
+    ##         <fctr>    <fctr> <int>   <dbl>    <int>     <dbl>       <dbl>
+    ##  1 Afghanistan      Asia  1952  28.801  8425333  779.4453  6567086330
+    ##  2 Afghanistan      Asia  1957  30.332  9240934  820.8530  7585448670
+    ##  3 Afghanistan      Asia  1962  31.997 10267083  853.1007  8758855797
+    ##  4 Afghanistan      Asia  1967  34.020 11537966  836.1971  9648014150
+    ##  5 Afghanistan      Asia  1972  36.088 13079460  739.9811  9678553274
+    ##  6 Afghanistan      Asia  1977  38.438 14880372  786.1134 11697659231
+    ##  7 Afghanistan      Asia  1982  39.854 12881816  978.0114 12598563401
+    ##  8 Afghanistan      Asia  1987  40.822 13867957  852.3959 11820990309
+    ##  9 Afghanistan      Asia  1992  41.674 16317921  649.3414 10595901589
+    ## 10 Afghanistan      Asia  1997  41.763 22227415  635.3414 14121995875
+    ## # ... with 1,694 more rows, and 1 more variables: gdpBill <dbl>
+
+``` r
+#Exercise: Make a new column called cc that pastes the country name followed by the continent, separated by a comma. (Hint: use the paste function with the sep=", " argument).
+
+mutate(gapminder, country_cont = paste(country, continent, sep = ", "))
+```
+
+    ## # A tibble: 1,704 x 7
+    ##        country continent  year lifeExp      pop gdpPercap
+    ##         <fctr>    <fctr> <int>   <dbl>    <int>     <dbl>
+    ##  1 Afghanistan      Asia  1952  28.801  8425333  779.4453
+    ##  2 Afghanistan      Asia  1957  30.332  9240934  820.8530
+    ##  3 Afghanistan      Asia  1962  31.997 10267083  853.1007
+    ##  4 Afghanistan      Asia  1967  34.020 11537966  836.1971
+    ##  5 Afghanistan      Asia  1972  36.088 13079460  739.9811
+    ##  6 Afghanistan      Asia  1977  38.438 14880372  786.1134
+    ##  7 Afghanistan      Asia  1982  39.854 12881816  978.0114
+    ##  8 Afghanistan      Asia  1987  40.822 13867957  852.3959
+    ##  9 Afghanistan      Asia  1992  41.674 16317921  649.3414
+    ## 10 Afghanistan      Asia  1997  41.763 22227415  635.3414
+    ## # ... with 1,694 more rows, and 1 more variables: country_cont <chr>
+
+summarize reduces a tibble according to summary statistics.
+
+``` r
+summarize(gapminder, mean_pop=mean(pop), sd_pop=sd(pop))
+```
+
+    ## # A tibble: 1 x 2
+    ##   mean_pop    sd_pop
+    ##      <dbl>     <dbl>
+    ## 1 29601212 106157897
+
+``` r
+gapminder %>% 
+    group_by(continent) %>% 
+    summarize(mean_pop=mean(pop), sd_pop=sd(pop))
+```
+
+    ## # A tibble: 5 x 3
+    ##   continent mean_pop    sd_pop
+    ##      <fctr>    <dbl>     <dbl>
+    ## 1    Africa  9916003  15490923
+    ## 2  Americas 24504795  50979430
+    ## 3      Asia 77038722 206885205
+    ## 4    Europe 17169765  20519438
+    ## 5   Oceania  8874672   6506342
+
+``` r
+group_by(gapminder, year<1970)
+```
+
+    ## # A tibble: 1,704 x 7
+    ## # Groups:   year < 1970 [2]
+    ##        country continent  year lifeExp      pop gdpPercap `year < 1970`
+    ##         <fctr>    <fctr> <int>   <dbl>    <int>     <dbl>         <lgl>
+    ##  1 Afghanistan      Asia  1952  28.801  8425333  779.4453          TRUE
+    ##  2 Afghanistan      Asia  1957  30.332  9240934  820.8530          TRUE
+    ##  3 Afghanistan      Asia  1962  31.997 10267083  853.1007          TRUE
+    ##  4 Afghanistan      Asia  1967  34.020 11537966  836.1971          TRUE
+    ##  5 Afghanistan      Asia  1972  36.088 13079460  739.9811         FALSE
+    ##  6 Afghanistan      Asia  1977  38.438 14880372  786.1134         FALSE
+    ##  7 Afghanistan      Asia  1982  39.854 12881816  978.0114         FALSE
+    ##  8 Afghanistan      Asia  1987  40.822 13867957  852.3959         FALSE
+    ##  9 Afghanistan      Asia  1992  41.674 16317921  649.3414         FALSE
+    ## 10 Afghanistan      Asia  1997  41.763 22227415  635.3414         FALSE
+    ## # ... with 1,694 more rows
+
+``` r
+(out1 <- gapminder %>% 
+    group_by(continent, year < 1970) %>% 
+    summarize(mean_pop=mean(pop), sd_pop=sd(pop)))
+```
+
+    ## # A tibble: 10 x 4
+    ## # Groups:   continent [?]
+    ##    continent `year < 1970` mean_pop    sd_pop
+    ##       <fctr>         <lgl>    <dbl>     <dbl>
+    ##  1    Africa         FALSE 12147359  17783750
+    ##  2    Africa          TRUE  5453291   7625960
+    ##  3  Americas         FALSE 28526576  56403222
+    ##  4  Americas          TRUE 16461232  36829335
+    ##  5      Asia         FALSE 90709000 234592299
+    ##  6      Asia          TRUE 49698167 132064025
+    ##  7    Europe         FALSE 18264875  21581017
+    ##  8    Europe          TRUE 14979544  18098838
+    ##  9   Oceania         FALSE 10155014   7136552
+    ## 10   Oceania          TRUE  6313989   4326110
+
+``` r
+#Exercise: Find the minimum GDP per capita experienced by each country
+(out2 <- gapminder %>% 
+    group_by(country) %>% 
+    summarize(min.gdp=min(gdpPercap)))
+```
+
+    ## # A tibble: 142 x 2
+    ##        country    min.gdp
+    ##         <fctr>      <dbl>
+    ##  1 Afghanistan   635.3414
+    ##  2     Albania  1601.0561
+    ##  3     Algeria  2449.0082
+    ##  4      Angola  2277.1409
+    ##  5   Argentina  5911.3151
+    ##  6   Australia 10039.5956
+    ##  7     Austria  6137.0765
+    ##  8     Bahrain  9867.0848
+    ##  9  Bangladesh   630.2336
+    ## 10     Belgium  8343.1051
+    ## # ... with 132 more rows
+
+``` r
+#Exercise: How many years of record does each country have?
+(out3 <- gapminder %>% 
+    group_by(country) %>% 
+    summarize(nyear = n_distinct(year)))
+```
+
+    ## # A tibble: 142 x 2
+    ##        country nyear
+    ##         <fctr> <int>
+    ##  1 Afghanistan    12
+    ##  2     Albania    12
+    ##  3     Algeria    12
+    ##  4      Angola    12
+    ##  5   Argentina    12
+    ##  6   Australia    12
+    ##  7     Austria    12
+    ##  8     Bahrain    12
+    ##  9  Bangladesh    12
+    ## 10     Belgium    12
+    ## # ... with 132 more rows
+
+``` r
+#Exercise: Within Asia, what are the min and max life expectancies experienced in each year?
+gapminder%>%
+  filter(continent == "Asia") %>%
+  group_by(year) %>%
+    summarize (miexp = min(lifeExp), (maxexp = max(lifeExp)))
+```
+
+    ## # A tibble: 12 x 3
+    ##     year  miexp `(maxexp = max(lifeExp))`
+    ##    <int>  <dbl>                     <dbl>
+    ##  1  1952 28.801                    65.390
+    ##  2  1957 30.332                    67.840
+    ##  3  1962 31.997                    69.390
+    ##  4  1967 34.020                    71.430
+    ##  5  1972 36.088                    73.420
+    ##  6  1977 31.220                    75.380
+    ##  7  1982 39.854                    77.110
+    ##  8  1987 40.822                    78.670
+    ##  9  1992 41.674                    79.360
+    ## 10  1997 41.763                    80.690
+    ## 11  2002 42.129                    82.000
+    ## 12  2007 43.828                    82.603
+
+cm006
+-----
+
+Using ggplot
+
+``` r
+p <- ggplot(gapminder, aes(x=year, y=lifeExp))
+p + geom_point(alpha = .25)
+```
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-22-1.png)
+
+``` r
+#Exercises:
+
+#Make a scatterplot of gdpPercap vs lifeExp. Store it in a variable called p2.
+p2 <- ggplot(gapminder, aes(x = gdpPercap, y = lifeExp))
+p2 + geom_point()
+```
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-23-1.png)
+
+``` r
+#To p2, make the size of the points indicate the year, choose a level of alpha transparency that you’re happy with, and make the points your favourite colour.
+p2 + geom_point(aes(size =year), alpha = .15, colour = "blue")
+```
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-23-2.png)
+
+``` r
+#To p2, colour the points by continent. but this time with year being represented by the size of the points.
+p2 + geom_point(aes(size=year, colour = continent), alpha = .15)
+```
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-23-3.png)
+
+``` r
+#To p2, add another layer called scale_x_log10(). Make a second plot by redoing the plot in (1), but replacing gdpPercap with log10(gdpPercap). What do you notice?
+#p3 <- ggplot(gapminder, aes(x = log10(gdpPercap), y = lifeExp))
+ggplot(gapminder, aes(x = log10(gdpPercap), y = lifeExp)) + geom_point(aes(colour= continent)) + scale_x_log10()
+```
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-23-4.png)

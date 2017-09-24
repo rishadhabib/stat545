@@ -145,7 +145,7 @@ gapminder %>%
 ```
 
 
-Date: 21st September 2017
+## Date: 21st September 2017
 
 mutate creates a new variable by calculating from other variables. 
 - transmute works the same way, but drops all other variables.
@@ -201,7 +201,7 @@ gapminder%>%
 ```
 
 
-##cm006
+## cm006
 
 Using ggplot
 
