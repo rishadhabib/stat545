@@ -46,23 +46,6 @@ cm005
 -----
 
 ``` r
-library(gapminder)
-library (tidyverse)
-```
-
-    ## Loading tidyverse: ggplot2
-    ## Loading tidyverse: tibble
-    ## Loading tidyverse: tidyr
-    ## Loading tidyverse: readr
-    ## Loading tidyverse: purrr
-    ## Loading tidyverse: dplyr
-
-    ## Conflicts with tidy packages ----------------------------------------------
-
-    ## filter(): dplyr, stats
-    ## lag():    dplyr, stats
-
-``` r
 ##How many variables (columns) are in the iris dataset, and what are their names?
 str(iris)
 ```
@@ -141,7 +124,6 @@ table(iris$Petal.Width, iris$Species)
     ##   2.5      0          0         3
 
 2.2. dplyr fundamentals
-=======================
 
 ``` r
 filter(gapminder, country=="Canada" & year >1970) #use the filter to choose your data
@@ -587,3 +569,105 @@ ggplot(gapminder, aes(x = log10(gdpPercap), y = lifeExp)) + geom_point(aes(colou
 ```
 
 ![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-23-4.png)
+
+cm007
+=====
+
+Facetting
+---------
+
+``` r
+ggplot(gapminder, aes(gdpPercap, lifeExp)) +
+    geom_point(aes(colour=continent))
+```
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-24-1.png)
+
+#### facet\_wrap: 1D facetting – we’ll focus on this first.
+
+#### facet\_grid: 2D facetting
+
+``` r
+ggplot(gapminder, aes(gdpPercap, lifeExp)) +
+    facet_wrap(~ continent, scales = "free", ncol = 3, labeller = "label_both") + #scales and ncol used
+    geom_point()
+```
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-25-1.png)
+
+Exercise 4: Make a plot of year (x) vs lifeExp (y), facetted by continent. Then, fit a smoother through the data for each continent, without the error bars. Choose a span that you feel is appropriate.
+
+``` r
+ggplot(gapminder, aes(y=lifeExp, x= year)) + 
+  facet_wrap(~continent) +
+  geom_point() + 
+  geom_smooth(se = FALSE, span = 1, method="loess") #span only works with method="loess"
+```
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-26-1.png)
+
+facet\_grid puts the panels in a grid.
+
+``` r
+vc2 <- gapminder %>% 
+    mutate(size=ifelse(pop > 7000000, "large", "small")) %>% #facet by “small” (<=7,000,000 population) and “large” (>7,000,000 population) countries. 
+    ggplot(aes(gdpPercap, lifeExp)) +
+    facet_grid(size ~ continent, scales = "free" ) 
+vc2 + geom_point(aes(colour=year)) #also try colour = continent
+```
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-27-1.png)
+
+``` r
+vc2 + 
+    geom_point(colour="red",
+               alpha=0.2) +
+    geom_smooth() +
+    scale_x_log10()
+```
+
+    ## `geom_smooth()` using method = 'loess'
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-28-1.png)
+
+#### Connect the dots with geom\_line
+
+geom\_line: connect the dots from left-to-right. geom\_path: connect the dots in the order that they appear in the data frame.
+
+``` r
+ggplot(gapminder, aes(year, lifeExp, group = country)) + # make sure you specify group
+    geom_line(alpha = .5, aes(colour = continent))
+```
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-29-1.png)
+
+``` r
+gapminder %>%
+    filter(country=="Bangladesh") %>% 
+    arrange(year) %>% 
+    ggplot(aes(pop, gdpPercap)) +
+    geom_point() +
+    geom_text(aes(label = year, hjust = 1.5))+
+    geom_path()
+```
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-30-1.png)
+
+Exercise 5: Plot the population over time (year) using lines, so that each country has its own line. Colour by gdpPercap. Add alpha transparency to your liking.
+
+``` r
+ggplot(gapminder, aes(y=pop, x= year, group = country, colour = gdpPercap)) +
+  geom_line(alpha = .5)
+```
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-31-1.png) Exercise 6: Add points to the plot in Exercise 5.
+
+``` r
+gapminder %>%
+  ggplot(aes(y=pop, x= year, group = country, colour = gdpPercap))+
+  scale_y_log10() +
+  geom_point() +
+  geom_line()
+```
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-32-1.png)

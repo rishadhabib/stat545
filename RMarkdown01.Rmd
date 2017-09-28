@@ -82,7 +82,7 @@ hist(petalwidth)
 table(iris$Petal.Width, iris$Species)
 ```
 
-#2.2. dplyr fundamentals
+2.2. dplyr fundamentals
 
 ```{r}
 filter(gapminder, country=="Canada" & year >1970) #use the filter to choose your data
