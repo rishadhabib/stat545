@@ -5,6 +5,8 @@ RMarkdown01
 -   ctrl + alt + i to insert a code chunk
 -   put a comma after r to set how the run will load
 
+Loading packages
+
 ``` r
 x <- rnorm(500)
 y <- rnorm(500) 
@@ -12,7 +14,7 @@ y <- rnorm(500)
 plot (x, y)
 ```
 
-![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-1-1.png)
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-2-1.png)
 
 R Markdown
 ----------
@@ -671,3 +673,542 @@ gapminder %>%
 ```
 
 ![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-32-1.png)
+
+cm008
+=====
+
+Linear Regression
+-----------------
+
+lm(y ~ x1 + x2 + ... + xp, data=your\_data\_frame)
+
+``` r
+fit1 =  lm(lifeExp ~ log(gdpPercap), data = gapminder)
+fit1
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = lifeExp ~ log(gdpPercap), data = gapminder)
+    ## 
+    ## Coefficients:
+    ##    (Intercept)  log(gdpPercap)  
+    ##         -9.101           8.405
+
+``` r
+fit1_small <- lm(lifeExp ~ log(gdpPercap), data=head(gapminder))
+lapply(fit1_small, identity) 
+```
+
+    ## $coefficients
+    ##    (Intercept) log(gdpPercap) 
+    ##      187.61570      -23.08098 
+    ## 
+    ## $residuals
+    ##          1          2          3          4          5          6 
+    ## -5.1280595 -2.4023520  0.1520397  1.7131151  0.9597015  4.7055553 
+    ## 
+    ## $effects
+    ##    (Intercept) log(gdpPercap)                                              
+    ##     -81.517386       2.710390       2.070161       3.508404       2.004734 
+    ##                
+    ##       6.121766 
+    ## 
+    ## $rank
+    ## [1] 2
+    ## 
+    ## $fitted.values
+    ##        1        2        3        4        5        6 
+    ## 33.92906 32.73435 31.84496 32.30688 35.12830 33.73244 
+    ## 
+    ## $assign
+    ## [1] 0 1
+    ## 
+    ## $qr
+    ## $qr
+    ##   (Intercept) log(gdpPercap)
+    ## 1  -2.4494897    -16.3790824
+    ## 2   0.4082483     -0.1174296
+    ## 3   0.4082483      0.5987063
+    ## 4   0.4082483      0.4282789
+    ## 5   0.4082483     -0.6126834
+    ## 6   0.4082483     -0.0976823
+    ## attr(,"assign")
+    ## [1] 0 1
+    ## 
+    ## $qraux
+    ## [1] 1.408248 1.270565
+    ## 
+    ## $pivot
+    ## [1] 1 2
+    ## 
+    ## $tol
+    ## [1] 1e-07
+    ## 
+    ## $rank
+    ## [1] 2
+    ## 
+    ## attr(,"class")
+    ## [1] "qr"
+    ## 
+    ## $df.residual
+    ## [1] 4
+    ## 
+    ## $xlevels
+    ## named list()
+    ## 
+    ## $call
+    ## lm(formula = lifeExp ~ log(gdpPercap), data = head(gapminder))
+    ## 
+    ## $terms
+    ## lifeExp ~ log(gdpPercap)
+    ## attr(,"variables")
+    ## list(lifeExp, log(gdpPercap))
+    ## attr(,"factors")
+    ##                log(gdpPercap)
+    ## lifeExp                     0
+    ## log(gdpPercap)              1
+    ## attr(,"term.labels")
+    ## [1] "log(gdpPercap)"
+    ## attr(,"order")
+    ## [1] 1
+    ## attr(,"intercept")
+    ## [1] 1
+    ## attr(,"response")
+    ## [1] 1
+    ## attr(,".Environment")
+    ## <environment: R_GlobalEnv>
+    ## attr(,"predvars")
+    ## list(lifeExp, log(gdpPercap))
+    ## attr(,"dataClasses")
+    ##        lifeExp log(gdpPercap) 
+    ##      "numeric"      "numeric" 
+    ## 
+    ## $model
+    ##   lifeExp log(gdpPercap)
+    ## 1  28.801       6.658583
+    ## 2  30.332       6.710344
+    ## 3  31.997       6.748878
+    ## 4  34.020       6.728864
+    ## 5  36.088       6.606625
+    ## 6  38.438       6.667101
+
+``` r
+predict(fit1) %>% head
+```
+
+    ##        1        2        3        4        5        6 
+    ## 46.86506 47.30012 47.62400 47.45579 46.42835 46.93666
+
+``` r
+qplot(log(gapminder$gdpPercap), predict(fit1))
+```
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-36-1.png)
+
+``` r
+ggplot(gapminder, aes(gdpPercap, lifeExp)) +
+    geom_point(alpha=0.3) +
+    geom_point(y=predict(fit1), colour="blue") + #you can also use geom_smooth(method ="lm") to draw the line but you can't get the regression coefficients from ggplot, for that you need lm
+    scale_x_log10()
+```
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-37-1.png)
+
+``` r
+my_newdata <- data.frame(gdpPercap=c(100, 547, 289))
+predict(fit1, newdata=my_newdata)
+```
+
+    ##        1        2        3 
+    ## 29.60596 43.88854 38.52591
+
+``` r
+predict(fit1, newdata=filter(gapminder, country=="Canada"))
+```
+
+    ##        1        2        3        4        5        6        7        8 
+    ## 69.38986 70.18158 70.81182 72.30336 73.69461 74.97451 75.27641 76.54409 
+    ##        9       10       11       12 
+    ## 76.45408 77.24871 78.43120 79.15337
+
+``` r
+fit1$coefficients # also can use coef(fit1) to find coefficients
+```
+
+    ##    (Intercept) log(gdpPercap) 
+    ##      -9.100889       8.405085
+
+``` r
+fit1$residuals %>% head # also can use resid(fit1) %>% head to find residuals
+```
+
+    ##          1          2          3          4          5          6 
+    ## -18.064063 -16.968123 -15.627000 -13.435788 -10.340352  -8.498661
+
+``` r
+# fit1$effects
+# fit1$fitted.values
+# fit1$qr
+# fit1$call 
+# fit1$model
+```
+
+``` r
+qplot(log(gapminder$gdpPercap), resid(fit1)) +
+    geom_hline(yintercept=0,
+               linetype="dashed") #you can add a horizontal line at any point using geom_hline
+```
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-40-1.png)
+
+``` r
+summ_fit1 <- summary(fit1)
+summ_fit1$r.squared
+```
+
+    ## [1] 0.6522466
+
+``` r
+summ_fit1$adj.r.squared
+```
+
+    ## [1] 0.6520423
+
+``` r
+summ_fit1$sigma   # standard deviation
+```
+
+    ## [1] 7.619535
+
+``` r
+?summary.lm # search for summary.lm documentation for all the variables included in the summary of class lm
+```
+
+    ## starting httpd help server ... done
+
+``` r
+?summary.glm
+```
+
+For GLM \#\# Poisson regression: glm(y ~ x1 + x2 + ... + xp, family=poisson, data=your\_data\_frame) \#\# Logistic (aka Binomial) regression: glm(y ~ x1 + x2 + ... + xp, family=binomial, data=your\_data\_frame)
+
+dplyr
+=====
+
+``` r
+gapminder %>%
+    group_by(continent) %>% 
+    summarize(mean_gdpPercap = mean(gdpPercap),
+              n_countries    = length(gdpPercap))
+```
+
+    ## # A tibble: 5 x 3
+    ##   continent mean_gdpPercap n_countries
+    ##      <fctr>          <dbl>       <int>
+    ## 1    Africa       2193.755         624
+    ## 2  Americas       7136.110         300
+    ## 3      Asia       7902.150         396
+    ## 4    Europe      14469.476         360
+    ## 5   Oceania      18621.609          24
+
+#### Calculating growth since the first record - pop\[1\]
+
+``` r
+gapminder %>% 
+    group_by(country) %>%  # need to group so that R knows how to group to calculate things
+    arrange(year) %>%      # should arrange the years so that row 1 is 1952
+    mutate(pop_growth = pop - pop[1])
+```
+
+    ## # A tibble: 1,704 x 7
+    ## # Groups:   country [142]
+    ##        country continent  year lifeExp      pop  gdpPercap pop_growth
+    ##         <fctr>    <fctr> <int>   <dbl>    <int>      <dbl>      <int>
+    ##  1 Afghanistan      Asia  1952  28.801  8425333   779.4453          0
+    ##  2     Albania    Europe  1952  55.230  1282697  1601.0561          0
+    ##  3     Algeria    Africa  1952  43.077  9279525  2449.0082          0
+    ##  4      Angola    Africa  1952  30.015  4232095  3520.6103          0
+    ##  5   Argentina  Americas  1952  62.485 17876956  5911.3151          0
+    ##  6   Australia   Oceania  1952  69.120  8691212 10039.5956          0
+    ##  7     Austria    Europe  1952  66.800  6927772  6137.0765          0
+    ##  8     Bahrain      Asia  1952  50.939   120447  9867.0848          0
+    ##  9  Bangladesh      Asia  1952  37.484 46886859   684.2442          0
+    ## 10     Belgium    Europe  1952  68.000  8730405  8343.1051          0
+    ## # ... with 1,694 more rows
+
+How about growth compared to 2007?
+
+``` r
+gapminder %>% 
+    group_by(country) %>% 
+    mutate(pop_growth = pop[year==2007] - pop)
+```
+
+    ## # A tibble: 1,704 x 7
+    ## # Groups:   country [142]
+    ##        country continent  year lifeExp      pop gdpPercap pop_growth
+    ##         <fctr>    <fctr> <int>   <dbl>    <int>     <dbl>      <int>
+    ##  1 Afghanistan      Asia  1952  28.801  8425333  779.4453   23464590
+    ##  2 Afghanistan      Asia  1957  30.332  9240934  820.8530   22648989
+    ##  3 Afghanistan      Asia  1962  31.997 10267083  853.1007   21622840
+    ##  4 Afghanistan      Asia  1967  34.020 11537966  836.1971   20351957
+    ##  5 Afghanistan      Asia  1972  36.088 13079460  739.9811   18810463
+    ##  6 Afghanistan      Asia  1977  38.438 14880372  786.1134   17009551
+    ##  7 Afghanistan      Asia  1982  39.854 12881816  978.0114   19008107
+    ##  8 Afghanistan      Asia  1987  40.822 13867957  852.3959   18021966
+    ##  9 Afghanistan      Asia  1992  41.674 16317921  649.3414   15572002
+    ## 10 Afghanistan      Asia  1997  41.763 22227415  635.3414    9662508
+    ## # ... with 1,694 more rows
+
+#### Growth compared to the last years pop
+
+``` r
+gapminder %>% 
+    group_by(country) %>% 
+    mutate(pop_growth = pop - lag(pop))
+```
+
+    ## # A tibble: 1,704 x 7
+    ## # Groups:   country [142]
+    ##        country continent  year lifeExp      pop gdpPercap pop_growth
+    ##         <fctr>    <fctr> <int>   <dbl>    <int>     <dbl>      <int>
+    ##  1 Afghanistan      Asia  1952  28.801  8425333  779.4453         NA
+    ##  2 Afghanistan      Asia  1957  30.332  9240934  820.8530     815601
+    ##  3 Afghanistan      Asia  1962  31.997 10267083  853.1007    1026149
+    ##  4 Afghanistan      Asia  1967  34.020 11537966  836.1971    1270883
+    ##  5 Afghanistan      Asia  1972  36.088 13079460  739.9811    1541494
+    ##  6 Afghanistan      Asia  1977  38.438 14880372  786.1134    1800912
+    ##  7 Afghanistan      Asia  1982  39.854 12881816  978.0114   -1998556
+    ##  8 Afghanistan      Asia  1987  40.822 13867957  852.3959     986141
+    ##  9 Afghanistan      Asia  1992  41.674 16317921  649.3414    2449964
+    ## 10 Afghanistan      Asia  1997  41.763 22227415  635.3414    5909494
+    ## # ... with 1,694 more rows
+
+Vectorized Functions: These take a vector, and operate on each component independently to return a vector of the same length. In other words, they work element-wise. Examples are cos, sin, log, exp, round. We don’t need to group\_by in order to mutate with these. Aggregate Functions: These take a vector, and return a vector of length 1 – as if “aggregating” the values in the vector into a single value. Examples are mean, sd, length, typeof. We use these in dplyr’s summarise function. Window Functions: these take a vector, and return a vector of the same length that depends on other values in the vector. Examples are lag, rank, cumsum. See the window-functions vignette for the dplyr package.
+
+ggplot
+------
+
+### Themes:
+
+theme\_grey \#default theme\_gray theme\_bw \#this is nice theme\_linedraw theme\_light \#this is nice theme\_dark theme\_minimal \#this is nice theme\_classic theme\_void theme\_test
+
+The arguments of theme follow a naming convention: general.to.specific axis.title axis.title.x
+
+``` r
+p1 <- ggplot(gapminder, aes(gdpPercap, lifeExp)) +
+    facet_wrap(~ continent) +
+    geom_point(colour="#386CB0", alpha=0.2) +
+    scale_x_log10()
+p1 + theme_bw()
+```
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-46-1.png)
+
+element\_blank (basically means replace with “nothing”) element\_rect: allows us to specify features of a rectangle. element\_line: allows us to specify features of a line. element\_text: allows us to specify font.
+
+``` r
+p1 + theme_bw()+
+    theme(strip.background = element_rect(fill="yellow"),
+          axis.title = element_text(size=14),
+          strip.text = element_text(size=14, face="bold"))
+```
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-47-1.png)
+
+### Modifying scales
+
+[link to a tutorial](https://github.com/hadley/ggplot2-book/blob/master/scales.rmd)
+
+-   scale\_x\_continuous
+-   scale\_colour\_discrete
+-   scale\_y\_sqrt
+
+``` r
+p1 + labs(x="GDP per capita", 
+          y="Life Expectancy",
+          title="A Plot of the World")
+```
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-48-1.png)
+
+``` r
+ggplot(gapminder, aes(gdpPercap, lifeExp)) +
+    geom_point(aes(colour=continent),
+               alpha=0.2) +
+  scale_colour_discrete("Continents of\n the World") # \n is for a new line
+```
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-49-1.png) breaks specify where along the scale you’d like to display a value.
+
+``` r
+## Log lines:
+p1 + scale_x_log10(breaks=c((1:10)*1000,
+                            (1:10)*10000))
+```
+
+    ## Scale for 'x' is already present. Adding another scale for 'x', which
+    ## will replace the existing scale.
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-50-1.png)
+
+``` r
+## Scale for 'x' is already present. Adding another scale for 'x', which
+## will replace the existing scale.
+```
+
+``` r
+p2 <- ggplot(gapminder, aes(gdpPercap, lifeExp)) +
+    geom_point(aes(colour=pop/10^9),
+               alpha=0.5)
+## Default breaks
+p2 + scale_x_log10(breaks=c((1:10)*1000,
+                            (1:10)*10000)) + 
+  scale_colour_continuous("Population\nin billions")
+```
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-51-1.png)
+
+``` r
+## Discrete scale:
+ggplot(gapminder, aes(gdpPercap, lifeExp)) +
+    geom_point(aes(colour=continent),
+               alpha=0.2) +
+    scale_colour_discrete(labels=c("Af", "Am", "As", "Eu", "Oc"))
+```
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-52-1.png)
+
+Exercises
+---------
+
+**Exercise 1:** Suppose we want to calculate some quantity for each country in the gapminder data set. For each of the following quantities, indicate whether the function is vectorized, aggregate, or window, and use dplyr functions to calculate the specified variable.
+
+i.e., the value that appears for 1962 would be the gdpPercap in 1957 (the previous entry). Hint: use the lag function, then filter out the NA’s created with the is.na function.
+
+``` r
+# The change in population from 1962 to 1972.
+gapminder %>%
+  filter(year %in% c("1962", "1972")) %>%
+  group_by(country) %>%
+  mutate(popchange62 = pop[year == 1962] - pop[year == 1972]) %>%
+  filter(year == 1972)
+```
+
+    ## # A tibble: 142 x 7
+    ## # Groups:   country [142]
+    ##        country continent  year lifeExp      pop  gdpPercap popchange62
+    ##         <fctr>    <fctr> <int>   <dbl>    <int>      <dbl>       <int>
+    ##  1 Afghanistan      Asia  1972  36.088 13079460   739.9811    -2812377
+    ##  2     Albania    Europe  1972  67.690  2263554  3313.4222     -535417
+    ##  3     Algeria    Africa  1972  54.518 14760787  4182.6638    -3759839
+    ##  4      Angola    Africa  1972  37.928  5894858  5473.2880    -1068843
+    ##  5   Argentina  Americas  1972  67.065 24779799  9443.0385    -3496016
+    ##  6   Australia   Oceania  1972  71.930 13177000 16788.6295    -2382032
+    ##  7     Austria    Europe  1972  70.630  7544201 16661.6256     -414337
+    ##  8     Bahrain      Asia  1972  63.300   230800 18268.6584      -58937
+    ##  9  Bangladesh      Asia  1972  45.252 70759295   630.2336   -13920006
+    ## 10     Belgium    Europe  1972  71.440  9709100 16672.1436     -490700
+    ## # ... with 132 more rows
+
+``` r
+## alternative
+gapminder %>%
+  filter(year %in% c("1962", "1972")) %>%
+           arrange(year) %>%
+           group_by(country) %>%
+                      summarize(pop_change = diff(pop))
+```
+
+    ## # A tibble: 142 x 2
+    ##        country pop_change
+    ##         <fctr>      <int>
+    ##  1 Afghanistan    2812377
+    ##  2     Albania     535417
+    ##  3     Algeria    3759839
+    ##  4      Angola    1068843
+    ##  5   Argentina    3496016
+    ##  6   Australia    2382032
+    ##  7     Austria     414337
+    ##  8     Bahrain      58937
+    ##  9  Bangladesh   13920006
+    ## 10     Belgium     490700
+    ## # ... with 132 more rows
+
+``` r
+# The population, in billions.
+gapminder %>%
+  transmute(country, continent, popbil = pop/10^9)
+```
+
+    ## # A tibble: 1,704 x 3
+    ##        country continent      popbil
+    ##         <fctr>    <fctr>       <dbl>
+    ##  1 Afghanistan      Asia 0.008425333
+    ##  2 Afghanistan      Asia 0.009240934
+    ##  3 Afghanistan      Asia 0.010267083
+    ##  4 Afghanistan      Asia 0.011537966
+    ##  5 Afghanistan      Asia 0.013079460
+    ##  6 Afghanistan      Asia 0.014880372
+    ##  7 Afghanistan      Asia 0.012881816
+    ##  8 Afghanistan      Asia 0.013867957
+    ##  9 Afghanistan      Asia 0.016317921
+    ## 10 Afghanistan      Asia 0.022227415
+    ## # ... with 1,694 more rows
+
+``` r
+# The lagged gdpPercap
+gapminder %>%
+  group_by(country) %>%
+  mutate(gdpgrowth = gdpPercap - lag(gdpPercap))
+```
+
+    ## # A tibble: 1,704 x 7
+    ## # Groups:   country [142]
+    ##        country continent  year lifeExp      pop gdpPercap  gdpgrowth
+    ##         <fctr>    <fctr> <int>   <dbl>    <int>     <dbl>      <dbl>
+    ##  1 Afghanistan      Asia  1952  28.801  8425333  779.4453         NA
+    ##  2 Afghanistan      Asia  1957  30.332  9240934  820.8530   41.40772
+    ##  3 Afghanistan      Asia  1962  31.997 10267083  853.1007   32.24768
+    ##  4 Afghanistan      Asia  1967  34.020 11537966  836.1971  -16.90357
+    ##  5 Afghanistan      Asia  1972  36.088 13079460  739.9811  -96.21603
+    ##  6 Afghanistan      Asia  1977  38.438 14880372  786.1134   46.13225
+    ##  7 Afghanistan      Asia  1982  39.854 12881816  978.0114  191.89808
+    ##  8 Afghanistan      Asia  1987  40.822 13867957  852.3959 -125.61549
+    ##  9 Afghanistan      Asia  1992  41.674 16317921  649.3414 -203.05455
+    ## 10 Afghanistan      Asia  1997  41.763 22227415  635.3414  -14.00004
+    ## # ... with 1,694 more rows
+
+**Exercise 2:** For the gapminder dataset, make a spaghetti plot showing the population trend (in millions) over time for each country, facetted by continent. Make as many of the following modifications as you can:
+
+``` r
+data2 <- gapminder %>%
+  group_by(country) %>%
+  mutate(logmaxgdp = log(max(gdpPercap)))
+```
+
+-   \[X\] Colour each line by the log maximum gdpPercap experienced by the country.
+-   \[X\] Rotate the x-axis labels to be vertical.
+-   \[ \] Remove the x-axis title.
+-   \[ \] Give the legend an appropriate title.
+-   \[ \] Put the y-axis on a log-scale.
+-   \[ \] Rename the y-axis title.
+-   \[ \] Add more numbers along the y-axis.
+-   \[ \] Give the plot a title, and center the title.
+-   \[ \] Only label the x axis with years 1950, 1975, and 2000.
+-   \[ \] Move the colour scale to the bottom.
+-   \[ \] Rename the colour legend
+
+``` r
+plot2 <- ggplot(data2, aes(x= year, y = pop, group = country, colour = logmaxgdp)) #Colour each line by the log maximum gdpPercap experienced by the country
+plot2 + geom_line(size = 1, alpha = .5) + 
+  facet_wrap( ~ continent, scales = "free") + 
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) + # Rotate the x-axis labels to be vertical.
+  scale_fill_discrete(name = "log") + 
+  ggtitle("Log of GDP by population for each continent") + #title
+  labs(x = "Years from 1950 to 2007", y = "Population", colour = "Log of Max GDP") # adds axis & legend labels
+```
+
+![](RMarkdown01_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-57-1.png)
